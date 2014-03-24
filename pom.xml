@@ -10,64 +10,76 @@
 
     <properties>
         <appengine.app.version>1</appengine.app.version>
-        <appengine.target.version>1.8.8</appengine.target.version>
+        <appengine.target.version>1.9.0</appengine.target.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencies>
-        <!-- Compile/runtime dependencies -->
         <dependency>
-            <groupId>com.google.appengine</groupId>
-            <artifactId>appengine-api-1.0-sdk</artifactId>
-            <version>${appengine.target.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.appengine</groupId>
-            <artifactId>appengine-endpoints</artifactId>
-            <version>${appengine.target.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
+          <groupId>com.google.code.findbugs</groupId>
+          <artifactId>jsr305</artifactId>
+          <version>1.3.9</version>
+      </dependency>
+      <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
             <version>1</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.jdo</groupId>
-            <artifactId>jdo-api</artifactId>
-            <version>3.0.1</version>
-        </dependency>
+          </dependency>    <!-- Compile/runtime dependencies -->
+    <dependency>
+      <groupId>com.google.appengine</groupId>
+      <artifactId>appengine-api-1.0-sdk</artifactId>
+      <version>${appengine.target.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.appengine</groupId>
+      <artifactId>appengine-endpoints</artifactId>
+      <version>${appengine.target.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>2.5</version>
+      <scope>provided</scope>
+    </dependency> 
+    <dependency>
+      <groupId>javax.jdo</groupId>
+      <artifactId>jdo-api</artifactId>
+      <version>3.0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sf.jsr107cache</groupId>
+      <artifactId>jsr107cache</artifactId>
+      <version>1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.datanucleus</groupId>
+      <artifactId>datanucleus-core</artifactId>
+      <version>3.1.4</version>
+    </dependency>  
+    <dependency>
+      <groupId>com.google.appengine.orm</groupId>
+      <artifactId>datanucleus-appengine</artifactId>
+      <version>2.1.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.datanucleus</groupId>
+      <artifactId>datanucleus-api-jdo</artifactId>
+      <version>3.1.3</version>
+    </dependency>    
 
-        <!-- Test Dependencies -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.10</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>1.9.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.appengine</groupId>
-            <artifactId>appengine-testing</artifactId>
-            <version>${appengine.target.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.appengine</groupId>
-            <artifactId>appengine-api-stubs</artifactId>
-            <version>${appengine.target.version}</version>
-            <scope>test</scope>
-        </dependency>
+    <!-- Test Dependencies -->
+    <dependency>
+      <groupId>com.google.appengine</groupId>
+      <artifactId>appengine-testing</artifactId>
+      <version>${appengine.target.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.appengine</groupId>
+      <artifactId>appengine-api-stubs</artifactId>
+      <version>${appengine.target.version}</version>
+      <scope>test</scope>
+    </dependency>
     </dependencies>
 
     <build>
@@ -125,6 +137,39 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+		        <groupId>org.datanucleus</groupId>
+		        <artifactId>datanucleus-maven-plugin</artifactId>
+		        <version>3.2.0-release</version>
+		        <dependencies>
+		          <dependency>
+		              <!-- Force the enhancer to use the same version of core as the JDO objectstore -->
+		              <groupId>org.datanucleus</groupId>
+		              <artifactId>datanucleus-core</artifactId>
+		              <version>3.1.4</version>
+		          </dependency>
+		          <dependency>
+		              <!-- Force the enhancer to use the same version of jdo-api as the JDO objectstore -->
+		              <groupId>javax.jdo</groupId>
+		              <artifactId>jdo-api</artifactId>
+		              <version>3.0.1</version>
+		          </dependency>
+		        </dependencies>
+		        <configuration>
+		            <fork>false</fork>
+		            <log4jConfiguration>${basedir}/src/main/webapp/WEB-INF/logging.properties</log4jConfiguration>
+		            <verbose>true</verbose>
+		            <props>${basedir}/datanucleus.properties</props>
+		        </configuration>
+		        <executions>
+		            <execution>
+		                <phase>compile</phase>
+		                <goals>
+		                    <goal>enhance</goal>
+		                </goals>
+		            </execution>
+		        </executions>
+		    </plugin>
         </plugins>
     </build>
 

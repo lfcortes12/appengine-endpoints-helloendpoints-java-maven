@@ -13,7 +13,7 @@ var google = google || {};
 google.devrel = google.devrel || {};
 
 /** samples namespace for DevRel sample code. */
-google.devrel.samples = google.devrel.samples || {};
+google.devrel.samples = google.devrel.samples || {}; 
 
 /** hello namespace for this sample. */
 google.devrel.samples.hello = google.devrel.samples.hello || {};
@@ -23,14 +23,14 @@ google.devrel.samples.hello = google.devrel.samples.hello || {};
  * @type {string}
  */
 google.devrel.samples.hello.CLIENT_ID =
-    'replace this with your web application client ID';
+    'psyched-oxide-525';
 
 /**
  * Scopes used by the application.
  * @type {string}
  */
 google.devrel.samples.hello.SCOPES =
-    'https://www.googleapis.com/auth/userinfo.email';
+    'https://www.googleapis.com/auth/118044331955@developer.gserviceaccount.com';
 
 /**
  * Whether or not the user is signed in.
@@ -39,106 +39,107 @@ google.devrel.samples.hello.SCOPES =
 google.devrel.samples.hello.signedIn = false;
 
 /**
- * Loads the application UI after the user has completed auth.
+ * Prints a message log.
+ * param {String} message to print.
  */
-google.devrel.samples.hello.userAuthed = function() {
-  var request = gapi.client.oauth2.userinfo.get().execute(function(resp) {
-    if (!resp.code) {
-      google.devrel.samples.hello.signedIn = true;
-      document.getElementById('signinButton').innerHTML = 'Sign out';
-      document.getElementById('authedGreeting').disabled = false;
+google.devrel.samples.hello.print = function(message, className) {
+  
+  
+  var messageDiv = document.getElementById('outputLog');
+  messageDiv.classList.add('alert');
+  messageDiv.classList.add(className);
+  messageDiv.classList.add('alert-dismissable');
+  messageDiv.innerHTML = message + '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
+  
+};
+
+/**
+ * Add user object to table
+ * param {Object} user to add.
+ */
+google.devrel.samples.hello.addTable = function(user) {
+	var table = document.getElementById("userTable");
+
+	var rowCount = table.rows.length;
+	var row = table.insertRow(rowCount);
+	row.className = "rowclass";
+
+	// Insert new cells (<td> elements) at the 1st and 2nd position of the "new" <tr> element:
+	var cell1 = row.insertCell(0);
+	var cell2 = row.insertCell(1);
+	var cell3 = row.insertCell(2);
+	var cell4 = row.insertCell(3);
+
+	// Add some text to the new cells:
+	cell1.innerHTML = user.name;
+	cell2.innerHTML = user.email;
+	cell3.innerHTML = user.password;
+	cell4.innerHTML = '<button type="button" class="btn btn-default btn-lg" id="google.devrel.samples.hello.userremove" onclick="google.devrel.samples.hello.userremove(this);"><span class="glyphicon glyphicon-minus"></span>Delete</button>';
+};
+
+/**
+ * Add user object to table
+ * param {Object} user to add.
+ */
+google.devrel.samples.hello.userremove = function(item) {
+	var d = item.parentNode.parentNode.rowIndex;
+	var id = document.getElementById("userTable").rows[d].cells[1].childNodes[0].data;
+	
+	if(id) {
+		gapi.client.helloworld.ensename.user.remove({ "id": id}).execute(
+	      function(resp) {
+	    	  if(resp) {
+	    		  google.devrel.samples.hello.print("User removed", 'alert-success');
+	    		  google.devrel.samples.hello.listUsers();
+	    		  
+	    	  }
+	      });
+	}
+	
+};
+
+/**
+ * Add user object to table
+ * param {Object} user to add.
+ */
+google.devrel.samples.hello.list = function(items) {
+	if (items) {
+		
+		$("#userTable .rowclass").remove();
+		
+		for (var i = 0; i < items.length; i++) {
+			google.devrel.samples.hello.addTable(items[i]);
+		}
     }
-  });
 };
 
 /**
- * Handles the auth flow, with the given value for immediate mode.
- * @param {boolean} mode Whether or not to use immediate mode.
- * @param {Function} callback Callback to call on completion.
+ * Get user name via the API.
  */
-google.devrel.samples.hello.signin = function(mode, callback) {
-  gapi.auth.authorize({client_id: google.devrel.samples.hello.CLIENT_ID,
-      scope: google.devrel.samples.hello.SCOPES, immediate: mode},
-      callback);
-};
-
-/**
- * Presents the user with the authorization popup.
- */
-google.devrel.samples.hello.auth = function() {
-  if (!google.devrel.samples.hello.signedIn) {
-    google.devrel.samples.hello.signin(false,
-        google.devrel.samples.hello.userAuthed);
-  } else {
-    google.devrel.samples.hello.signedIn = false;
-    document.getElementById('signinButton').innerHTML = 'Sign in';
-    document.getElementById('authedGreeting').disabled = true;
-  }
-};
-
-/**
- * Prints a greeting to the greeting log.
- * param {Object} greeting Greeting to print.
- */
-google.devrel.samples.hello.print = function(greeting) {
-  var element = document.createElement('div');
-  element.classList.add('row');
-  element.innerHTML = greeting.message;
-  document.getElementById('outputLog').appendChild(element);
-};
-
-/**
- * Gets a numbered greeting via the API.
- * @param {string} id ID of the greeting.
- */
-google.devrel.samples.hello.getGreeting = function(id) {
-  gapi.client.helloworld.greetings.getGreeting({'id': id}).execute(
+google.devrel.samples.hello.getUserName = function(name, email, password) {
+	user = new Object();
+	user.name = name;
+	user.email = email;
+	user.password = password;
+  gapi.client.helloworld.ensename.user.create(user).execute(
       function(resp) {
-        if (!resp.code) {
-          google.devrel.samples.hello.print(resp);
-        }
+    	  if(resp) {
+    		  google.devrel.samples.hello.print("User added", 'alert-success');
+    		  google.devrel.samples.hello.listUsers();
+    	  } else {
+    		  google.devrel.samples.hello.print("exists an user with this email", 'alert-warning');
+    	  }
       });
 };
 
 /**
- * Lists greetings via the API.
+ * Query for all user elements
+ * 
  */
-google.devrel.samples.hello.listGreeting = function() {
-  gapi.client.helloworld.greetings.listGreeting().execute(
+google.devrel.samples.hello.listUsers = function() {
+	gapi.client.helloworld.ensename.user.list().execute(
       function(resp) {
-        if (!resp.code) {
-          resp.items = resp.items || [];
-          for (var i = 0; i < resp.items.length; i++) {
-            google.devrel.samples.hello.print(resp.items[i]);
-          }
-        }
-      });
-};
-
-/**
- * Gets a greeting a specified number of times.
- * @param {string} greeting Greeting to repeat.
- * @param {string} count Number of times to repeat it.
- */
-google.devrel.samples.hello.multiplyGreeting = function(
-    greeting, times) {
-  gapi.client.helloworld.greetings.multiply({
-      'message': greeting,
-      'times': times
-    }).execute(function(resp) {
-      if (!resp.code) {
-        google.devrel.samples.hello.print(resp);
-      }
-    });
-};
-
-/**
- * Greets the current user via the API.
- */
-google.devrel.samples.hello.authedGreeting = function(id) {
-  gapi.client.helloworld.greetings.authed().execute(
-      function(resp) {
-        google.devrel.samples.hello.print(resp);
+        google.devrel.samples.hello.list(resp.items);
       });
 };
 
@@ -146,28 +147,30 @@ google.devrel.samples.hello.authedGreeting = function(id) {
  * Enables the button callbacks in the UI.
  */
 google.devrel.samples.hello.enableButtons = function() {
-  document.getElementById('getGreeting').onclick = function() {
-    google.devrel.samples.hello.getGreeting(
-        document.getElementById('id').value);
-  }
-
-  document.getElementById('listGreeting').onclick = function() {
-    google.devrel.samples.hello.listGreeting();
-  }
-
-  document.getElementById('multiplyGreetings').onclick = function() {
-    google.devrel.samples.hello.multiplyGreeting(
-        document.getElementById('greeting').value,
-        document.getElementById('count').value);
-  }
-
-  document.getElementById('authedGreeting').onclick = function() {
-    google.devrel.samples.hello.authedGreeting();
+   
+  document.getElementById('userForm').onclick = function() {
+	  google.devrel.samples.hello.restartLogDiv();
+	  google.devrel.samples.hello.getUserName(
+			  	document.getElementById('exampleInputName1').value,
+		        document.getElementById('exampleInputEmail1').value,
+		        document.getElementById('exampleInputPassword1').value);
   }
   
-  document.getElementById('signinButton').onclick = function() {
-    google.devrel.samples.hello.auth();
-  }
+
+};
+
+/**
+ * Reconfigure log div
+ * 
+ */
+google.devrel.samples.hello.restartLogDiv = function() {
+	var messageDiv = document.getElementById('outputLog');
+	  messageDiv.classList.remove('alert');
+	  messageDiv.classList.remove('alert-dismissable');
+	  if(messageDiv.classList.contains('alert-success')) messageDiv.classList.remove('alert-success');
+	  if(messageDiv.classList.contains('alert-warning')) messageDiv.classList.remove('alert-warning');
+	  if(messageDiv.classList.contains('alert-info')) messageDiv.classList.remove('alert-info');
+	  messageDiv.innerHTML = ''; 
 };
 
 /**
@@ -181,12 +184,15 @@ google.devrel.samples.hello.init = function(apiRoot) {
   var callback = function() {
     if (--apisToLoad == 0) {
       google.devrel.samples.hello.enableButtons();
-      google.devrel.samples.hello.signin(true,
-          google.devrel.samples.hello.userAuthed);
+      google.devrel.samples.hello.print("Loading content ...", 'alert-info');
+      google.devrel.samples.hello.listUsers();
+      google.devrel.samples.hello.restartLogDiv();
+      
     }
+    
   }
 
-  apisToLoad = 2; // must match number of calls to gapi.client.load()
+  apisToLoad = 1; // must match number of calls to gapi.client.load()
   gapi.client.load('helloworld', 'v1', callback, apiRoot);
-  gapi.client.load('oauth2', 'v2', callback);
+  //gapi.client.load('oauth2', 'v2', callback);
 };
